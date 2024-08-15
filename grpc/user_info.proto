@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+
+option go_package = "/user_info";
+
+package user_info;
+
+
+service UserInfoService {
+    rpc UserRegister(CreateUserRequest) returns (CreateUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (google.protobuf.Empty);
+    rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (google.protobuf.Empty) ;
+    rpc GetUserDeteil(GetUserRequest) returns (GetUserResponse);
+}
+
+message User {
+    string id = 1;
+    string account = 2;
+    string email = 3;
+    string password = 4;
+    UserInfo user_info = 5;
+    string created_at = 6;
+    string modified_at = 7;
+}
+
+message UserInfo {
+    string name = 1;
+    string country = 2;
+    int64 points = 3;
+    int32 hp = 4;
+}
+
+message CreateUserRequest {
+    User user = 1;
+}
+
+message CreateUserResponse {
+    string id = 1;
+}
+
+
+message UpdateUserRequest {
+    User user = 1;
+}
+
+
+message UpdateUserPasswordRequest {
+    string id = 1;
+    string newPassword = 2;
+    string oldPassword = 3;
+}
+
+message GetUserRequest {
+    string id = 1;
+}
+
+message GetUserResponse {
+    User user = 1;
+}
+
+
+
+
+

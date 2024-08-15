@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+
+option go_package = "/user_auth";
+
+package user_auth;
+
+
+service UserAuthService {
+    rpc Login(loginRequest) returns (loginResponse);
+    rpc LineLogin(LineloginRequest) returns (loginResponse);
+    rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty) ;
+}
+
+message loginRequest {
+    string account = 1;
+    string password = 2;
+}
+
+message loginResponse {
+    string token = 1;
+}
+
+message LineloginRequest {
+    string code = 1;
+}
+
+
+

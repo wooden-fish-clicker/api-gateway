@@ -1,0 +1,50 @@
+[App]
+    PrefixUrl = "http://127.0.0.1:8080"
+
+    AppName = "api-gateway"
+
+    LogSavePath = "logs/"
+    LogSaveName = "log"
+    LogFileExt = "log"
+    MaxLogFiles = 5
+
+    ImageStaticPath = "/static/"
+    ImageSavePath = "upload/images/"
+
+[Server]
+    RunMode = "debug" #debug or release
+    HttpPort = 8080
+    ReadTimeout = 60
+    WriteTimeout = 60
+
+
+
+[MySql]
+    Type = "mysql"
+    Host = "127.0.0.1:3306"
+    Name = "gin_test"
+    User = "root"
+    Password = "root"
+
+
+  [MySql.Base]
+    ConnMaxLifeTime = 60 #分
+    MaxIdleConns = 30
+    MaxOpenConns = 100
+
+[Jwt]
+    Secret = "gin_example"
+    ExpirationDays = 30 # 天
+
+[redis]
+  Addr = "127.0.0.1:6379"
+  DB = "0"
+  Password = ""
+
+
+# [mail]
+#   host = "smtp.163.com"
+#   pass = ""
+#   port = 465
+#   to = ""
+#   user = ""
