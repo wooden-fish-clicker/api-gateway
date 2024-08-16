@@ -23,7 +23,7 @@ func InitRouter() *gin.Engine {
 	apiGroup.PUT("/user", apiV1.UpdateUser)
 	apiGroup.PATCH("/user", apiV1.UpdateUserPassword)
 	apiGroup.GET("/user", apiV1.GetCurrentUserInfo)
-	apiGroup.GET("/user/{id}", apiV1.GetUserInfo)
+	apiGroup.GET("/user/:id", apiV1.GetUserInfo)
 
 	apiGroup.GET("auth/logout", apiV1.Logout)
 	apiGroup.POST("auth/login/line", apiV1.LineLogin)

@@ -45,7 +45,7 @@ func Register(c *gin.Context) {
 		return
 	} else if httpCode == http.StatusInternalServerError {
 		logger.Error(errors)
-		appG.Response(httpCode, false, "建立失敗", "發生錯誤", nil)
+		appG.Response(httpCode, false, "建立失敗", errors, nil)
 		return
 	}
 
@@ -63,10 +63,10 @@ func Register(c *gin.Context) {
 	if err != nil {
 		errMsg := strings.Split(err.Error(), " = ")[2]
 		if errMsg == "帳號或信箱已存在" {
-			appG.Response(http.StatusConflict, false, "建立失敗", err.Error(), nil)
+			appG.Response(http.StatusConflict, false, "建立失敗", map[string]string{"建立失敗": err.Error()}, nil)
 			return
 		}
-		appG.Response(http.StatusInternalServerError, false, "建立失敗", err.Error(), nil)
+		appG.Response(http.StatusInternalServerError, false, "建立失敗", map[string]string{"發生錯誤": err.Error()}, nil)
 		return
 	}
 	appG.Response(http.StatusOK, true, "建立成功", nil, map[string]string{"id": response.GetId()})
@@ -84,13 +84,13 @@ func UpdateUser(c *gin.Context) {
 		return
 	} else if httpCode == http.StatusInternalServerError {
 		logger.Error(errors)
-		appG.Response(httpCode, false, "更新失敗", "發生錯誤", nil)
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
 		return
 	}
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", "c.Get(jwtClaims) 不存在", nil)
+		appG.Response(http.StatusInternalServerError, false, "更新失敗", map[string]string{"發生錯誤": "c.Get(jwtClaims) 不存在"}, nil)
 		return
 	}
 
@@ -114,13 +114,13 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		errMsg := strings.Split(err.Error(), " = ")[2]
 		if errMsg == "帳號或信箱已存在" {
-			appG.Response(http.StatusConflict, false, "更新失敗", err.Error(), nil)
+			appG.Response(http.StatusConflict, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
 			return
 		} else if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "更新失敗", err.Error(), nil)
+			appG.Response(http.StatusNotFound, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
 			return
 		}
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", err.Error(), nil)
+		appG.Response(http.StatusInternalServerError, false, "更新失敗", map[string]string{"發生錯誤": err.Error()}, nil)
 		return
 	}
 	appG.Response(http.StatusOK, true, "更新成功", nil, nil)
@@ -139,13 +139,13 @@ func UpdateUserPassword(c *gin.Context) {
 		return
 	} else if httpCode == http.StatusInternalServerError {
 		logger.Error(errors)
-		appG.Response(httpCode, false, "更新失敗", "發生錯誤", nil)
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
 		return
 	}
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", "c.Get(jwtClaims) 不存在", nil)
+		appG.Response(http.StatusInternalServerError, false, "更新失敗", map[string]string{"發生錯誤": "c.Get(jwtClaims) 不存在"}, nil)
 		return
 	}
 
@@ -163,17 +163,31 @@ func UpdateUserPassword(c *gin.Context) {
 	if err != nil {
 		errMsg := strings.Split(err.Error(), " = ")[2]
 		if errMsg == "舊密碼錯誤" {
-			appG.Response(http.StatusForbidden, false, "更新失敗", err.Error(), nil)
+			appG.Response(http.StatusForbidden, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
 			return
 		} else if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "更新失敗", err.Error(), nil)
+			appG.Response(http.StatusNotFound, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
 			return
 		}
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", err.Error(), nil)
+		appG.Response(http.StatusInternalServerError, false, "更新失敗", map[string]string{"發生錯誤": err.Error()}, nil)
 		return
 	}
 	appG.Response(http.StatusOK, true, "更新成功", nil, nil)
 
+}
+
+type GetCurrentUserInfoResponse struct {
+	ID       string   `json:"id"`
+	Account  string   `json:"account"`
+	Email    string   `json:"email"`
+	UserInfo UserInfo `json:"user_info"`
+}
+
+type UserInfo struct {
+	Name    string `json:"name"`
+	Country string `json:"country"`
+	Points  int64  `json:"points"`
+	Hp      int32  `json:"hp"`
 }
 
 func GetCurrentUserInfo(c *gin.Context) {
@@ -183,7 +197,7 @@ func GetCurrentUserInfo(c *gin.Context) {
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", "c.Get(jwtClaims) 不存在", nil)
+		appG.Response(http.StatusInternalServerError, false, "取得資料成功", map[string]string{"發生錯誤": "c.Get(jwtClaims) 不存在"}, nil)
 		return
 	}
 
@@ -199,14 +213,32 @@ func GetCurrentUserInfo(c *gin.Context) {
 	if err != nil {
 		errMsg := strings.Split(err.Error(), " = ")[2]
 		if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "更新失敗", err.Error(), nil)
+			appG.Response(http.StatusNotFound, false, "取得資料成功", map[string]string{"更新失敗": err.Error()}, nil)
 			return
 		}
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", err.Error(), nil)
+		appG.Response(http.StatusInternalServerError, false, "取得資料成功", map[string]string{"發生錯誤": err.Error()}, nil)
 		return
 	}
-	appG.Response(http.StatusOK, true, "更新成功", nil, response)
 
+	user := GetCurrentUserInfoResponse{
+		ID:      response.GetUser().GetId(),
+		Account: response.GetUser().GetAccount(),
+		Email:   response.GetUser().GetEmail(),
+		UserInfo: UserInfo{
+			Name:    response.GetUser().GetUserInfo().GetName(),
+			Country: response.GetUser().GetUserInfo().GetCountry(),
+			Points:  response.GetUser().GetUserInfo().GetPoints(),
+			Hp:      response.GetUser().GetUserInfo().GetHp(),
+		},
+	}
+
+	appG.Response(http.StatusOK, true, "取得資料成功", nil, user)
+
+}
+
+type GetUserInfoResponse struct {
+	ID       string   `json:"id"`
+	UserInfo UserInfo `json:"user_info"`
 }
 
 func GetUserInfo(c *gin.Context) {
@@ -224,12 +256,23 @@ func GetUserInfo(c *gin.Context) {
 	if err != nil {
 		errMsg := strings.Split(err.Error(), " = ")[2]
 		if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "更新失敗", err.Error(), nil)
+			appG.Response(http.StatusNotFound, false, "取得資料成功", map[string]string{"更新失敗": err.Error()}, nil)
 			return
 		}
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", err.Error(), nil)
+		appG.Response(http.StatusInternalServerError, false, "取得資料成功", map[string]string{"發生錯誤": err.Error()}, nil)
 		return
 	}
-	appG.Response(http.StatusOK, true, "更新成功", nil, response)
+
+	user := GetUserInfoResponse{
+		ID: response.GetUser().GetId(),
+		UserInfo: UserInfo{
+			Name:    response.GetUser().GetUserInfo().GetName(),
+			Country: response.GetUser().GetUserInfo().GetCountry(),
+			Points:  response.GetUser().GetUserInfo().GetPoints(),
+			Hp:      response.GetUser().GetUserInfo().GetHp(),
+		},
+	}
+
+	appG.Response(http.StatusOK, true, "取得資料成功", nil, user)
 
 }

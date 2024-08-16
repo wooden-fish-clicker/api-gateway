@@ -39,7 +39,7 @@ func Login(c *gin.Context) {
 		return
 	} else if httpCode == http.StatusInternalServerError {
 		logger.Error(errors)
-		appG.Response(httpCode, false, "登入失敗", "發生錯誤", nil)
+		appG.Response(httpCode, false, "登入失敗", errors, nil)
 		return
 	}
 
@@ -58,16 +58,16 @@ func Login(c *gin.Context) {
 			code := st.Code()
 
 			if code == codes.Unauthenticated {
-				appG.Response(http.StatusUnauthorized, false, "登入失敗", st.Message(), nil)
+				appG.Response(http.StatusUnauthorized, false, "登入失敗", map[string]string{"登入失敗": st.Message()}, nil)
 				return
 			}
 			logger.Error(err.Error())
-			appG.Response(http.StatusInternalServerError, false, "登入失敗", "發生錯誤", nil)
+			appG.Response(http.StatusInternalServerError, false, "登入失敗", map[string]string{"發生錯誤": err.Error()}, nil)
 			return
 		} else {
 			// 不是 gRPC 錯誤，可能是其他錯誤
 			logger.Error("status.FromError 發生錯誤")
-			appG.Response(http.StatusInternalServerError, false, "登入失敗", "發生錯誤", nil)
+			appG.Response(http.StatusInternalServerError, false, "登入失敗", map[string]string{"發生錯誤": "status.FromError 發生錯誤"}, nil)
 			return
 		}
 	}
@@ -88,7 +88,7 @@ func LineLogin(c *gin.Context) {
 		return
 	} else if httpCode == http.StatusInternalServerError {
 		logger.Error(errors)
-		appG.Response(httpCode, false, "登入失敗", "發生錯誤", nil)
+		appG.Response(httpCode, false, "登入失敗", errors, nil)
 		return
 	}
 
@@ -103,11 +103,11 @@ func LineLogin(c *gin.Context) {
 		// 使用 status 包解析錯誤
 		st, ok := status.FromError(err)
 		if ok {
-			appG.Response(http.StatusInternalServerError, false, "登入失敗", st.Message(), nil)
+			appG.Response(http.StatusInternalServerError, false, "登入失敗", map[string]string{"登入失敗": st.Message()}, nil)
 			return
 		} else {
 			logger.Error("status.FromError 發生錯誤")
-			appG.Response(http.StatusInternalServerError, false, "登入失敗", "發生錯誤", nil)
+			appG.Response(http.StatusInternalServerError, false, "登入失敗", map[string]string{"發生錯誤": "status.FromError 發生錯誤"}, nil)
 			return
 		}
 	}
@@ -117,14 +117,13 @@ func LineLogin(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	var appG = app.Gin{C: c}
-	fmt.Println(1)
+
 	jwtToken, exist := c.Get("jwtToken")
 	if !exist {
 		logger.Error("c.Get(jwtToken)不存在")
 		appG.Response(http.StatusOK, true, "登出成功", nil, nil)
 		return
 	}
-	fmt.Println(jwtToken.(string))
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
