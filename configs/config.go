@@ -96,9 +96,7 @@ func Setup() {
 		log.Fatalf("unable to decode into struct, %v", err)
 	}
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	godotenv.Load()
 
 	applyEnvVariables()
 }
