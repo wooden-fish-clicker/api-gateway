@@ -17,12 +17,12 @@ import (
 )
 
 type LoginForm struct {
-	Account  string `form:"account" valid:"Required;MaxSize(100)"`
-	Password string `form:"password" valid:"Required;MinSize(8);MaxSize(100)"`
+	Account  string `json:"account" valid:"Required;MaxSize(100)"`
+	Password string `json:"password" valid:"Required;MinSize(8);MaxSize(100)"`
 }
 
 type LineLoginForm struct {
-	Code string `form:"code" valid:"Required;MaxSize(100)"`
+	Code string `json:"code" valid:"Required;MaxSize(100)"`
 }
 
 var UserAuthService user_auth.UserAuthServiceClient

@@ -14,21 +14,21 @@ import (
 )
 
 type RegisterForm struct {
-	Account  string `form:"account" valid:"Required;MaxSize(100)"`
-	Email    string `form:"email" valid:"Required;Email;MaxSize(255)"`
-	Password string `form:"password" valid:"Required;MinSize(8);MaxSize(100)"`
+	Account  string `json:"account" valid:"Required;MaxSize(100)"`
+	Email    string `json:"email" valid:"Required;Email;MaxSize(255)"`
+	Password string `json:"password" valid:"Required;MinSize(8);MaxSize(100)"`
 }
 
 type UpdateUserForm struct {
-	Account string `form:"account" valid:"Required;MaxSize(100)"`
-	Email   string `form:"email" valid:"Required;Email;MaxSize(255)"`
-	Name    string `form:"name" valid:"Required;MaxSize(100)"`
-	Country string `form:"country" valid:"Required;MaxSize(100)"`
+	Account string `json:"account" valid:"Required;MaxSize(100)"`
+	Email   string `json:"email" valid:"Required;Email;MaxSize(255)"`
+	Name    string `json:"name" valid:"Required;MaxSize(100)"`
+	Country string `json:"country" valid:"Required;MaxSize(100)"`
 }
 
 type UpdateUserPasswordForm struct {
-	OldPassword string `form:"old_password" valid:"Required;MinSize(8);MaxSize(100)"`
-	NewPassword string `form:"new_password" valid:"Required;MinSize(8);MaxSize(100)"`
+	OldPassword string `json:"old_password" valid:"Required;MinSize(8);MaxSize(100)"`
+	NewPassword string `json:"new_password" valid:"Required;MinSize(8);MaxSize(100)"`
 }
 
 var UserInfoService user_info.UserInfoServiceClient
