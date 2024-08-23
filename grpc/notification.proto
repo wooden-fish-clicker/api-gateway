@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = "/notification";
+
+package notification;
+
+
+service NotificationService {
+    rpc UpdateNotification(UpdateNotificationRequest) returns (google.protobuf.Empty);
+    rpc ReadNotification(ReadNotificationRequest) returns (google.protobuf.Empty);
+    rpc DeleteNotification(DeleteNotificationRequest) returns (google.protobuf.Empty);
+    rpc GetNotificationList(GetNotificationListRequest) returns (GetNotificationListResponse);
+}
+
+message Notification {
+    string id = 1;
+    string user_id = 2;
+    int32 type = 3;
+    string title = 4;
+    string content = 5;
+    int32 status = 6;
+    string created_at = 7;
+    string updated_at = 8;
+}
+
+message UpdateNotificationRequest {
+    Notification notification = 1;
+}
+
+message ReadNotificationRequest {
+    repeated string ids = 1;
+}
+
+message DeleteNotificationRequest {
+    string id = 1;
+}
+
+message GetNotificationListRequest {
+    string user_id = 1;
+}
+
+message GetNotificationListResponse {
+    repeated Notification notification = 1;
+}
+
+
+
+
+
+
