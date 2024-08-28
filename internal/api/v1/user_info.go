@@ -2,12 +2,11 @@ package v1
 
 import (
 	"api-gateway/grpc/user_info"
+	"api-gateway/internal/api"
 	"api-gateway/pkg/app"
-	"api-gateway/pkg/logger"
 	"api-gateway/pkg/utils"
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -40,14 +39,7 @@ func Register(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	if httpCode == http.StatusBadRequest {
-		appG.Response(httpCode, false, "建立失敗", errors, nil)
-		return
-	} else if httpCode == http.StatusInternalServerError {
-		logger.Error(errors)
-		appG.Response(httpCode, false, "建立失敗", errors, nil)
-		return
-	}
+	api.HandleValidError(httpCode, errors, &appG)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -61,14 +53,10 @@ func Register(c *gin.Context) {
 	})
 
 	if err != nil {
-		errMsg := strings.Split(err.Error(), " = ")[2]
-		if errMsg == "帳號或信箱已存在" {
-			appG.Response(http.StatusConflict, false, "建立失敗", map[string]string{"建立失敗": err.Error()}, nil)
-			return
-		}
-		appG.Response(http.StatusInternalServerError, false, "建立失敗", map[string]string{"發生錯誤": err.Error()}, nil)
+		api.HandleGRPCError(err, &appG)
 		return
 	}
+
 	appG.Response(http.StatusOK, true, "建立成功", nil, map[string]string{"id": response.GetId()})
 }
 
@@ -79,14 +67,7 @@ func UpdateUser(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	if httpCode == http.StatusBadRequest {
-		appG.Response(httpCode, false, "更新失敗", errors, nil)
-		return
-	} else if httpCode == http.StatusInternalServerError {
-		logger.Error(errors)
-		appG.Response(httpCode, false, "更新失敗", errors, nil)
-		return
-	}
+	api.HandleValidError(httpCode, errors, &appG)
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {
@@ -112,17 +93,10 @@ func UpdateUser(c *gin.Context) {
 	})
 
 	if err != nil {
-		errMsg := strings.Split(err.Error(), " = ")[2]
-		if errMsg == "帳號或信箱已存在" {
-			appG.Response(http.StatusConflict, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
-			return
-		} else if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
-			return
-		}
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", map[string]string{"發生錯誤": err.Error()}, nil)
+		api.HandleGRPCError(err, &appG)
 		return
 	}
+
 	appG.Response(http.StatusOK, true, "更新成功", nil, nil)
 
 }
@@ -134,14 +108,7 @@ func UpdateUserPassword(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	if httpCode == http.StatusBadRequest {
-		appG.Response(httpCode, false, "更新失敗", errors, nil)
-		return
-	} else if httpCode == http.StatusInternalServerError {
-		logger.Error(errors)
-		appG.Response(httpCode, false, "更新失敗", errors, nil)
-		return
-	}
+	api.HandleValidError(httpCode, errors, &appG)
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {
@@ -161,17 +128,10 @@ func UpdateUserPassword(c *gin.Context) {
 	})
 
 	if err != nil {
-		errMsg := strings.Split(err.Error(), " = ")[2]
-		if errMsg == "舊密碼錯誤" {
-			appG.Response(http.StatusForbidden, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
-			return
-		} else if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "更新失敗", map[string]string{"更新失敗": err.Error()}, nil)
-			return
-		}
-		appG.Response(http.StatusInternalServerError, false, "更新失敗", map[string]string{"發生錯誤": err.Error()}, nil)
+		api.HandleGRPCError(err, &appG)
 		return
 	}
+
 	appG.Response(http.StatusOK, true, "更新成功", nil, nil)
 
 }
@@ -211,12 +171,7 @@ func GetCurrentUserInfo(c *gin.Context) {
 	})
 
 	if err != nil {
-		errMsg := strings.Split(err.Error(), " = ")[2]
-		if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "取得資料成功", map[string]string{"更新失敗": err.Error()}, nil)
-			return
-		}
-		appG.Response(http.StatusInternalServerError, false, "取得資料成功", map[string]string{"發生錯誤": err.Error()}, nil)
+		api.HandleGRPCError(err, &appG)
 		return
 	}
 
@@ -254,12 +209,7 @@ func GetUserInfo(c *gin.Context) {
 	})
 
 	if err != nil {
-		errMsg := strings.Split(err.Error(), " = ")[2]
-		if errMsg == "找不到此id" {
-			appG.Response(http.StatusNotFound, false, "取得資料成功", map[string]string{"更新失敗": err.Error()}, nil)
-			return
-		}
-		appG.Response(http.StatusInternalServerError, false, "取得資料成功", map[string]string{"發生錯誤": err.Error()}, nil)
+		api.HandleGRPCError(err, &appG)
 		return
 	}
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"api-gateway/configs"
+	"api-gateway/grpc/notification"
 	"api-gateway/grpc/user_auth"
 	"api-gateway/grpc/user_info"
 	v1 "api-gateway/internal/api/v1"
@@ -28,12 +29,25 @@ func init() {
 	// db.ConnectMongoDB()
 }
 
+var microServices = map[string]func(conn *grpc.ClientConn){
+	viper.GetString("USER_INFO_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
+		userInfoClient := user_info.NewUserInfoServiceClient(conn)
+		v1.UserInfoService = userInfoClient
+	},
+	viper.GetString("USER_AUTH_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
+		userAuthClient := user_auth.NewUserAuthServiceClient(conn)
+		v1.UserAuthService = userAuthClient
+	},
+	viper.GetString("NOTIFICATION_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
+		notificationClient := notification.NewNotificationServiceClient(conn)
+		v1.NotificationService = notificationClient
+	},
+	// .......在這裡添加更多server
+}
+
 func main() {
 
-	createGrpcClient(
-		viper.GetString("USER_INFO_SERVICE_ADDR"),
-		viper.GetString("USER_AUTH_SERVICE_ADDR"),
-	)
+	createGrpcClient()
 
 	// Gin server
 	gin.SetMode(configs.C.Server.RunMode)
@@ -53,22 +67,14 @@ func main() {
 
 }
 
-func createGrpcClient(microServices ...string) {
+func createGrpcClient() {
 
-	for _, serviceAddr := range microServices {
-
+	for serviceAddr, initClient := range microServices {
 		conn, err := grpc.NewClient(serviceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			logger.Fatal("無法連接到服務器 %s：%v", serviceAddr, err)
 		}
 
-		switch serviceAddr {
-		case viper.GetString("USER_INFO_SERVICE_ADDR"):
-			userInfoClient := user_info.NewUserInfoServiceClient(conn)
-			v1.UserInfoService = userInfoClient
-		case viper.GetString("USER_AUTH_SERVICE_ADDR"):
-			userAuthClient := user_auth.NewUserAuthServiceClient(conn)
-			v1.UserAuthService = userAuthClient
-		}
+		initClient(conn)
 	}
 }
