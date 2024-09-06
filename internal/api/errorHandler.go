@@ -2,7 +2,6 @@ package api
 
 import (
 	"api-gateway/pkg/app"
-	"api-gateway/pkg/logger"
 	"log"
 	"net/http"
 
@@ -50,15 +49,4 @@ func HandleGRPCError(err error, appG *app.Gin) {
 
 	log.Printf("%s: %s", errorMsg, msg)
 	appG.Response(statusCode, false, errorMsg, map[string]string{errorMsg: msg}, nil)
-}
-
-func HandleValidError(httpCode int, errors map[string]string, appG *app.Gin) {
-	if httpCode == http.StatusBadRequest {
-		appG.Response(httpCode, false, "更新失敗", errors, nil)
-		return
-	} else if httpCode == http.StatusInternalServerError {
-		logger.Error(errors)
-		appG.Response(httpCode, false, "更新失敗", errors, nil)
-		return
-	}
 }

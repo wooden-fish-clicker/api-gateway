@@ -32,7 +32,14 @@ func Login(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	api.HandleValidError(httpCode, errors, &appG)
+	if httpCode == http.StatusBadRequest {
+		appG.Response(httpCode, false, "登入失敗", errors, nil)
+		return
+	} else if httpCode == http.StatusInternalServerError {
+		logger.Error(errors)
+		appG.Response(httpCode, false, "登入失敗", errors, nil)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -58,7 +65,14 @@ func LineLogin(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	api.HandleValidError(httpCode, errors, &appG)
+	if httpCode == http.StatusBadRequest {
+		appG.Response(httpCode, false, "登入失敗", errors, nil)
+		return
+	} else if httpCode == http.StatusInternalServerError {
+		logger.Error(errors)
+		appG.Response(httpCode, false, "登入失敗", errors, nil)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

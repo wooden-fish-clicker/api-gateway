@@ -4,6 +4,7 @@ import (
 	"api-gateway/grpc/user_info"
 	"api-gateway/internal/api"
 	"api-gateway/pkg/app"
+	"api-gateway/pkg/logger"
 	"api-gateway/pkg/utils"
 	"context"
 	"net/http"
@@ -39,7 +40,14 @@ func Register(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	api.HandleValidError(httpCode, errors, &appG)
+	if httpCode == http.StatusBadRequest {
+		appG.Response(httpCode, false, "建立失敗", errors, nil)
+		return
+	} else if httpCode == http.StatusInternalServerError {
+		logger.Error(errors)
+		appG.Response(httpCode, false, "建立失敗", errors, nil)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -67,7 +75,14 @@ func UpdateUser(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	api.HandleValidError(httpCode, errors, &appG)
+	if httpCode == http.StatusBadRequest {
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
+		return
+	} else if httpCode == http.StatusInternalServerError {
+		logger.Error(errors)
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
+		return
+	}
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {
@@ -108,7 +123,14 @@ func UpdateUserPassword(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	api.HandleValidError(httpCode, errors, &appG)
+	if httpCode == http.StatusBadRequest {
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
+		return
+	} else if httpCode == http.StatusInternalServerError {
+		logger.Error(errors)
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
+		return
+	}
 
 	jwtClaims, exist := c.Get("jwtClaims")
 	if !exist {

@@ -4,6 +4,7 @@ import (
 	"api-gateway/grpc/notification"
 	"api-gateway/internal/api"
 	"api-gateway/pkg/app"
+	"api-gateway/pkg/logger"
 	"api-gateway/pkg/utils"
 	"context"
 	"net/http"
@@ -25,7 +26,14 @@ func ReadNotification(c *gin.Context) {
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
-	api.HandleValidError(httpCode, errors, &appG)
+	if httpCode == http.StatusBadRequest {
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
+		return
+	} else if httpCode == http.StatusInternalServerError {
+		logger.Error(errors)
+		appG.Response(httpCode, false, "更新失敗", errors, nil)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
