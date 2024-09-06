@@ -14,35 +14,36 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var microServices map[string]func(conn *grpc.ClientConn)
+
 func init() {
-	godotenv.Load(".env")
 	configs.Setup()
 	logger.Setup()
 	// db.ConnectDB()
 	redis.ConnectRedis()
 	// db.ConnectMongoDB()
-}
 
-var microServices = map[string]func(conn *grpc.ClientConn){
-	viper.GetString("USER_INFO_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
-		userInfoClient := user_info.NewUserInfoServiceClient(conn)
-		v1.UserInfoService = userInfoClient
-	},
-	viper.GetString("USER_AUTH_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
-		userAuthClient := user_auth.NewUserAuthServiceClient(conn)
-		v1.UserAuthService = userAuthClient
-	},
-	viper.GetString("NOTIFICATION_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
-		notificationClient := notification.NewNotificationServiceClient(conn)
-		v1.NotificationService = notificationClient
-	},
-	// .......在這裡添加更多server
+	microServices = map[string]func(conn *grpc.ClientConn){
+		viper.GetString("USER_INFO_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
+			userInfoClient := user_info.NewUserInfoServiceClient(conn)
+			v1.UserInfoService = userInfoClient
+		},
+		viper.GetString("USER_AUTH_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
+			userAuthClient := user_auth.NewUserAuthServiceClient(conn)
+			v1.UserAuthService = userAuthClient
+		},
+		viper.GetString("NOTIFICATION_SERVICE_ADDR"): func(conn *grpc.ClientConn) {
+			notificationClient := notification.NewNotificationServiceClient(conn)
+			v1.NotificationService = notificationClient
+		},
+		// 在這裡添加更多 server
+	}
+
 }
 
 func main() {
