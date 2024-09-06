@@ -28,5 +28,9 @@ func InitRouter() *gin.Engine {
 	apiGroup.GET("auth/logout", apiV1.Logout)
 	apiGroup.POST("auth/login/line", apiV1.LineLogin)
 
+	apiGroup.GET("/notifications", apiV1.GetNotificationList)
+	apiGroup.PUT("/notification/read", apiV1.ReadNotification)
+	apiGroup.DELETE("/notification/:id", apiV1.DeleteNotification)
+
 	return r
 }
