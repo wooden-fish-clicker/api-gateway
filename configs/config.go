@@ -45,6 +45,7 @@ type MySqlBase struct {
 
 type MongoDB struct {
 	ConnString string
+	Name       string
 }
 
 type Jwt struct {
@@ -111,6 +112,7 @@ func applyEnvVariables() {
 	C.MySql.Name = viper.GetString("DB_NAME")
 
 	C.MongoDB.ConnString = viper.GetString("MONGO_DB_COONSTRING")
+	C.MongoDB.Name = viper.GetString("MONGO_DB_NAME")
 
 	C.Redis.Addr = viper.GetString("REDIS_ADDR")
 	C.Redis.Password = viper.GetString("REDIS_PASSWORD")
