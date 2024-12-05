@@ -1,36 +1,46 @@
 package routers
 
 import (
-	apiV1 "api-gateway/internal/api/v1"
+	v1 "api-gateway/internal/api/v1"
 	"api-gateway/middleware"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/fx"
 )
 
-func InitRouter() *gin.Engine {
+type RouterParams struct {
+	fx.In
+
+	Middleware *middleware.Middleware
+	UserAuth   *v1.UserAuth
+	UserInfo   *v1.UserInfo
+	Notify     *v1.Notify
+}
+
+func InitRouter(routerParams RouterParams) *gin.Engine {
 	r := gin.New()
 
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.Use(middleware.RateLimiter())
+	r.Use(routerParams.Middleware.RateLimiter.CheckRate())
 
 	apiGroup := r.Group("/api/v1")
 
-	apiGroup.POST("/user", apiV1.Register)
-	apiGroup.POST("auth/login", apiV1.Login)
+	apiGroup.POST("/user", routerParams.UserInfo.Register)
+	apiGroup.POST("auth/login", routerParams.UserAuth.Login)
 
-	apiGroup.Use(middleware.CheckToken())
-	apiGroup.PUT("/user", apiV1.UpdateUser)
-	apiGroup.PATCH("/user", apiV1.UpdateUserPassword)
-	apiGroup.GET("/user", apiV1.GetCurrentUserInfo)
-	apiGroup.GET("/user/:id", apiV1.GetUserInfo)
+	apiGroup.Use(routerParams.Middleware.CheckJwtToken.CheckToken())
+	apiGroup.PUT("/user", routerParams.UserInfo.UpdateUser)
+	apiGroup.PATCH("/user", routerParams.UserInfo.UpdateUserPassword)
+	apiGroup.GET("/user", routerParams.UserInfo.GetCurrentUserInfo)
+	apiGroup.GET("/user/:id", routerParams.UserInfo.GetUserInfo)
 
-	apiGroup.GET("auth/logout", apiV1.Logout)
-	apiGroup.POST("auth/login/line", apiV1.LineLogin)
+	apiGroup.GET("auth/logout", routerParams.UserAuth.Logout)
+	apiGroup.POST("auth/login/line", routerParams.UserAuth.LineLogin)
 
-	apiGroup.GET("/notifications", apiV1.GetNotificationList)
-	apiGroup.PUT("/notification/read", apiV1.ReadNotification)
-	apiGroup.DELETE("/notification/:id", apiV1.DeleteNotification)
+	apiGroup.GET("/notifications", routerParams.Notify.GetNotificationList)
+	apiGroup.PUT("/notification/read", routerParams.Notify.ReadNotification)
+	apiGroup.DELETE("/notification/:id", routerParams.Notify.DeleteNotification)
 
 	return r
 }

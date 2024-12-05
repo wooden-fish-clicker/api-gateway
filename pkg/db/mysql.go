@@ -11,51 +11,33 @@ import (
 	"gorm.io/driver/mysql"
 )
 
-var MySql *gorm.DB
+type MySql struct {
+	Client *gorm.DB
+}
 
-func ConnectDB() {
+func NewMySqlClient(connString string, dbName string) *MySql {
+	mysqlClient := ConnectDB(connString, dbName)
+	return &MySql{Client: mysqlClient}
+}
 
-	var err error
+func ConnectDB(connString string, dbName string) *gorm.DB {
 
-	user := configs.C.MySql.User         // 用戶名
-	password := configs.C.MySql.Password // 密碼
-	host := configs.C.MySql.Host         // 主機地址
-	name := configs.C.MySql.Name         // 名稱
+	checkDatabaseExists(connString, dbName)
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/",
-		user,
-		password,
-		host,
-	)
-
-	MySql, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		logger.Fatal("failed to connect database: %v", err)
-	}
-
-	// Check if database exists, if not create it
-	if !checkDatabaseExists(name) {
-		createDatabase(name)
-	}
-
-	CloseDB()
-
-	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		user,
-		password,
-		host,
-		name,
+	dsn := fmt.Sprintf("%s%s?charset=utf8mb4&parseTime=True&loc=Local",
+		configs.C.MySql.ConnString,
+		configs.C.MySql.Name,
 	)
 
 	// 連接數據庫
 
-	MySql, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	clinet, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 
 		logger.Fatal("連接數據庫失敗:", err)
 	}
 
-	sqlDB, err := MySql.DB()
+	sqlDB, err := clinet.DB()
 	if err != nil {
 		logger.Fatal("failed to get db instance: ", err)
 	}
@@ -63,10 +45,11 @@ func ConnectDB() {
 	sqlDB.SetMaxOpenConns(configs.C.MySql.MySqlBase.MaxOpenConns)
 	sqlDB.SetConnMaxLifetime(configs.C.MySql.MySqlBase.ConnMaxLifeTime * time.Minute)
 
+	return clinet
 }
 
-func CloseDB() {
-	sqlDB, err := MySql.DB()
+func (m *MySql) CloseDB() {
+	sqlDB, err := m.Client.DB()
 	if err != nil {
 		logger.Fatal("models.CloseDB err: ", err)
 	}
@@ -74,21 +57,30 @@ func CloseDB() {
 }
 
 // CheckDatabaseExists checks if a database with the given name exists
-func checkDatabaseExists(dbName string) bool {
-	var count int64
-	MySql.Raw("SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", dbName).Scan(&count)
-	return count > 0
-}
-
-// CreateDatabase creates a new database with the given name
-func createDatabase(dbName string) {
-	result := MySql.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
-	if result.Error != nil {
-		logger.Fatal("failed to create database: ", result.Error)
+func checkDatabaseExists(connString string, dbName string) {
+	clinet, err := gorm.Open(mysql.Open(connString), &gorm.Config{})
+	if err != nil {
+		logger.Fatal("failed to connect database: %v", err)
 	}
-	logger.Info("Database %s created successfully\n", dbName)
+
+	var count int64
+	clinet.Raw("SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", dbName).Scan(&count)
+
+	if count < 0 {
+		result := clinet.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
+		if result.Error != nil {
+			logger.Fatal("failed to create database: ", result.Error)
+		}
+		logger.Info("Database %s created successfully\n", dbName)
+	}
+
+	sqlDB, err := clinet.DB()
+	if err != nil {
+		logger.Fatal("models.CloseDB err: ", err)
+	}
+	defer sqlDB.Close()
 }
 
-func Migrate(dst ...interface{}) error {
-	return MySql.AutoMigrate(dst...)
-}
+// func Migrate(dst ...interface{}) error {
+// 	return clinet.AutoMigrate(dst...)
+// }

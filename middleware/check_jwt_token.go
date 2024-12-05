@@ -12,7 +12,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CheckToken() gin.HandlerFunc {
+type CheckJwtToken struct {
+	Redis *redis.Redis
+}
+
+func NewCheckJwtToken(redis *redis.Redis) *CheckJwtToken {
+	return &CheckJwtToken{Redis: redis}
+}
+
+func (cjt *CheckJwtToken) CheckToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		appG := app.Gin{C: c}
@@ -34,7 +42,7 @@ func CheckToken() gin.HandlerFunc {
 		}
 
 		//檢查redis裡面的黑名單的token
-		err := checkRedisJwtBlackList(parts[1])
+		err := cjt.checkRedisJwtBlackList(parts[1])
 		if err != nil && err.Error() != "redis: nil" {
 			appG.Response(http.StatusInternalServerError, false, "未登入", "發生錯誤", nil)
 			c.Abort()
@@ -88,8 +96,8 @@ func CheckToken() gin.HandlerFunc {
 // 	return errors.New("沒有權限")
 // }
 
-func checkRedisJwtBlackList(token string) error {
-	_, err := redis.Rd.Get(context.Background(), "jwt:blacklist:"+token).Result()
+func (cjt *CheckJwtToken) checkRedisJwtBlackList(token string) error {
+	_, err := cjt.Redis.Client.Get(context.Background(), "jwt:blacklist:"+token).Result()
 
 	if err != nil {
 		return err

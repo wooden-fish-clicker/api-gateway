@@ -8,24 +8,34 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MongoDB *mongo.Client
+// var MongoDB *mongo.Client
 
-func ConnectMongoDB() {
-	clientOptions := options.Client().ApplyURI("mongodb://admin:admin123@localhost:27017")
+type MongoDB struct {
+	Client *mongo.Client
+}
 
-	var err error
-	MongoDB, err = mongo.Connect(context.TODO(), clientOptions)
+func NewMongoDBClient(connString string) *MongoDB {
+	mongoClient := connectMongoDB(connString)
+	return &MongoDB{mongoClient}
+}
+
+func connectMongoDB(connString string) *mongo.Client {
+	clientOptions := options.Client().ApplyURI(connString)
+
+	mongoClient, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		logger.Fatal("無法連接到MongoDB: ", err)
 	}
 
-	err = MongoDB.Ping(context.TODO(), nil)
+	err = mongoClient.Ping(context.TODO(), nil)
 	if err != nil {
 		logger.Fatal("無法連接到MongoDB: ", err)
 	}
+
+	return mongoClient
 
 }
 
-func CloseMongoDB() {
-	defer MongoDB.Disconnect(context.TODO())
+func (m *MongoDB) CloseMongoDB() {
+	defer m.Client.Disconnect(context.TODO())
 }

@@ -14,6 +14,16 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+type UserAuth struct {
+	UserAuthService user_auth.UserAuthServiceClient
+}
+
+func NewUserAuth(userAuthService user_auth.UserAuthServiceClient) *UserAuth {
+	return &UserAuth{
+		UserAuthService: userAuthService,
+	}
+}
+
 type LoginForm struct {
 	Account  string `json:"account" valid:"Required;MaxSize(100)"`
 	Password string `json:"password" valid:"Required;MinSize(8);MaxSize(100)"`
@@ -23,9 +33,7 @@ type LineLoginForm struct {
 	Code string `json:"code" valid:"Required;MaxSize(100)"`
 }
 
-var UserAuthService user_auth.UserAuthServiceClient
-
-func Login(c *gin.Context) {
+func (u *UserAuth) Login(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
 		form LoginForm
@@ -44,7 +52,7 @@ func Login(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := UserAuthService.Login(ctx, &user_auth.LoginRequest{
+	response, err := u.UserAuthService.Login(ctx, &user_auth.LoginRequest{
 		Account:  form.Account,
 		Password: form.Password,
 	})
@@ -58,7 +66,7 @@ func Login(c *gin.Context) {
 
 }
 
-func LineLogin(c *gin.Context) {
+func (u *UserAuth) LineLogin(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
 		form LineLoginForm
@@ -77,7 +85,7 @@ func LineLogin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := UserAuthService.LineLogin(ctx, &user_auth.LineloginRequest{
+	response, err := u.UserAuthService.LineLogin(ctx, &user_auth.LineloginRequest{
 		Code: form.Code,
 	})
 
@@ -89,7 +97,7 @@ func LineLogin(c *gin.Context) {
 	appG.Response(http.StatusOK, true, "登入成功", nil, map[string]string{"token": response.GetToken()})
 }
 
-func Logout(c *gin.Context) {
+func (u *UserAuth) Logout(c *gin.Context) {
 	var appG = app.Gin{C: c}
 
 	jwtToken, exist := c.Get("jwtToken")
@@ -105,7 +113,7 @@ func Logout(c *gin.Context) {
 	md := metadata.Pairs("authorization", jwtToken.(string))
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	empty := new(emptypb.Empty)
-	_, err := UserAuthService.Logout(ctx, empty)
+	_, err := u.UserAuthService.Logout(ctx, empty)
 	if err != nil {
 		logger.Error(err.Error())
 		appG.Response(http.StatusOK, true, "登出成功", nil, nil)

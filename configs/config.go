@@ -31,10 +31,8 @@ type Server struct {
 }
 
 type MySql struct {
-	Host     string
-	Name     string
-	User     string
-	Password string
+	ConnString string
+	Name       string
 
 	MySqlBase MySqlBase
 }
@@ -46,11 +44,7 @@ type MySqlBase struct {
 }
 
 type MongoDB struct {
-	Host     string
-	Port     int
-	Name     string
-	User     string
-	Password string
+	ConnString string
 }
 
 type Jwt struct {
@@ -64,13 +58,20 @@ type Redis struct {
 	DB       int
 }
 
+type Service struct {
+	UserInfo     string
+	UserAuth     string
+	Notification string
+}
+
 type Config struct {
 	App     App
 	Server  Server
 	MySql   MySql
+	MongoDB MongoDB
 	Jwt     Jwt
 	Redis   Redis
-	MongoDB MongoDB
+	Service Service
 }
 
 var C Config
@@ -103,17 +104,22 @@ func Setup() {
 
 func applyEnvVariables() {
 	C.App.PrefixUrl = viper.GetString("PREFIX_URL")
-	C.App.AppName = viper.GetString("APP_NAME")
+
 	C.Server.RunMode = viper.GetString("RUN_MODE")
-	C.Server.HttpPort = viper.GetInt("HTTP_PORT")
-	C.MongoDB.Host = viper.GetString("MONGODB_HOST")
-	C.MongoDB.Port = viper.GetInt("MONGODB_PORT")
-	C.MongoDB.Password = viper.GetString("MONGODB_PASSWORD")
-	C.MongoDB.Name = viper.GetString("MONGODB_NAME")
-	C.MongoDB.User = viper.GetString("MONGODB_USER")
+
+	C.MySql.ConnString = viper.GetString("DB_CONNSTRING")
+	C.MySql.Name = viper.GetString("DB_NAME")
+
+	C.MongoDB.ConnString = viper.GetString("MONGO_DB_COONSTRING")
+
 	C.Redis.Addr = viper.GetString("REDIS_ADDR")
 	C.Redis.Password = viper.GetString("REDIS_PASSWORD")
 	C.Redis.DB = viper.GetInt("REDIS_DB")
+
 	C.Jwt.Secret = viper.GetString("JWT_SECRET")
 	C.Jwt.ExpirationDays = viper.GetInt("JWT_EXPIRATION_DAYS")
+
+	C.Service.UserInfo = viper.GetString("USER_INFO_SERVICE_ADDR")
+	C.Service.UserAuth = viper.GetString("USER_AUTH_SERVICE_ADDR")
+	C.Service.Notification = viper.GetString("NOTIFICATION_SERVICE_ADDR")
 }

@@ -8,13 +8,20 @@ import (
 	"golang.org/x/time/rate"
 )
 
-// 每秒20，最多累積40個
-var limiter = rate.NewLimiter(20, 40)
+type RateLimiter struct {
+	Limiter *rate.Limiter
+}
 
-func RateLimiter() gin.HandlerFunc {
+func NewRateLimiter() *RateLimiter {
+	// 每秒最多允許20個請求，最多累積40個
+	limiter := rate.NewLimiter(20, 40)
+	return &RateLimiter{Limiter: limiter}
+}
+
+func (rl *RateLimiter) CheckRate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		appG := app.Gin{C: c}
-		if !limiter.Allow() {
+		if !rl.Limiter.Allow() {
 			appG.Response(http.StatusTooManyRequests, false, "請求過多", nil, nil)
 		}
 

@@ -13,13 +13,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Notify struct {
+	NotificationService notification.NotificationServiceClient
+}
+
+func NewNotify(notificationService notification.NotificationServiceClient) *Notify {
+	return &Notify{
+		NotificationService: notificationService,
+	}
+}
+
 type ReadNotificationForm struct {
 	IDs []string `json:"ids" valid:"Required"`
 }
 
-var NotificationService notification.NotificationServiceClient
-
-func ReadNotification(c *gin.Context) {
+func (n *Notify) ReadNotification(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
 		form ReadNotificationForm
@@ -38,7 +46,7 @@ func ReadNotification(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := NotificationService.ReadNotification(ctx, &notification.ReadNotificationRequest{
+	_, err := n.NotificationService.ReadNotification(ctx, &notification.ReadNotificationRequest{
 		Ids: form.IDs,
 	})
 
@@ -49,7 +57,7 @@ func ReadNotification(c *gin.Context) {
 	appG.Response(http.StatusOK, true, "更新成功", nil, nil)
 }
 
-func DeleteNotification(c *gin.Context) {
+func (n *Notify) DeleteNotification(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
 	)
@@ -57,7 +65,7 @@ func DeleteNotification(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := NotificationService.DeleteNotification(ctx, &notification.DeleteNotificationRequest{
+	_, err := n.NotificationService.DeleteNotification(ctx, &notification.DeleteNotificationRequest{
 		Id: c.Param("id"),
 	})
 
@@ -79,7 +87,7 @@ type GetNotificationListResponse struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func GetNotificationList(c *gin.Context) {
+func (n *Notify) GetNotificationList(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
 	)
@@ -95,7 +103,7 @@ func GetNotificationList(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := NotificationService.GetNotificationList(ctx, &notification.GetNotificationListRequest{
+	response, err := n.NotificationService.GetNotificationList(ctx, &notification.GetNotificationListRequest{
 		UserId: claims.Subject,
 	})
 
