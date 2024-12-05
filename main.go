@@ -88,7 +88,13 @@ func startServer(lc fx.Lifecycle, router *gin.Engine) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			logger.Info("Starting server on :8080")
-			go server.ListenAndServe()
+
+			go func() {
+				if err := server.ListenAndServe(); err != nil {
+					logger.Fatal("Starting server error ：%v", err)
+				}
+			}()
+
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
