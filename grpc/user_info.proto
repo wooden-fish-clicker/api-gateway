@@ -21,8 +21,6 @@ message User {
     string email = 3;
     string password = 4;
     UserInfo user_info = 5;
-    string created_at = 6;
-    string modified_at = 7;
 }
 
 message UserInfo {
@@ -33,7 +31,9 @@ message UserInfo {
 }
 
 message CreateUserRequest {
-    User user = 1;
+    string account = 2;
+    string email = 3;
+    string password = 4;
 }
 
 message CreateUserResponse {
