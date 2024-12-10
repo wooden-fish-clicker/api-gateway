@@ -3,6 +3,7 @@ package v1
 import (
 	"api-gateway/grpc/notification"
 	"api-gateway/internal/api"
+	"api-gateway/internal/dtos"
 	"api-gateway/pkg/app"
 	"api-gateway/pkg/logger"
 	"api-gateway/pkg/utils"
@@ -23,14 +24,10 @@ func NewNotify(notificationService notification.NotificationServiceClient) *Noti
 	}
 }
 
-type ReadNotificationForm struct {
-	IDs []string `json:"ids" valid:"Required"`
-}
-
 func (n *Notify) ReadNotification(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
-		form ReadNotificationForm
+		form dtos.ReadNotificationForm
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
@@ -74,17 +71,6 @@ func (n *Notify) DeleteNotification(c *gin.Context) {
 		return
 	}
 	appG.Response(http.StatusOK, true, "刪除成功", nil, nil)
-}
-
-type GetNotificationListResponse struct {
-	ID        string `json:"id"`
-	UserId    string `json:"user_id"`
-	Type      int32  `json:"type"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	Status    int32  `json:"status"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
 }
 
 func (n *Notify) GetNotificationList(c *gin.Context) {

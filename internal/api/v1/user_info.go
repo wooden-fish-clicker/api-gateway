@@ -3,6 +3,7 @@ package v1
 import (
 	"api-gateway/grpc/user_info"
 	"api-gateway/internal/api"
+	"api-gateway/internal/dtos"
 	"api-gateway/pkg/app"
 	"api-gateway/pkg/logger"
 	"api-gateway/pkg/utils"
@@ -23,28 +24,10 @@ func NewUserInfo(userInfoService user_info.UserInfoServiceClient) *UserInfo {
 	}
 }
 
-type RegisterForm struct {
-	Account  string `json:"account" valid:"Required;MaxSize(100)"`
-	Email    string `json:"email" valid:"Required;Email;MaxSize(255)"`
-	Password string `json:"password" valid:"Required;MinSize(8);MaxSize(100)"`
-}
-
-type UpdateUserForm struct {
-	Account string `json:"account" valid:"Required;MaxSize(100)"`
-	Email   string `json:"email" valid:"Required;Email;MaxSize(255)"`
-	Name    string `json:"name" valid:"Required;MaxSize(100)"`
-	Country string `json:"country" valid:"Required;MaxSize(100)"`
-}
-
-type UpdateUserPasswordForm struct {
-	OldPassword string `json:"old_password" valid:"Required;MinSize(8);MaxSize(100)"`
-	NewPassword string `json:"new_password" valid:"Required;MinSize(8);MaxSize(100)"`
-}
-
 func (u *UserInfo) Register(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
-		form RegisterForm
+		form dtos.RegisterForm
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
@@ -77,7 +60,7 @@ func (u *UserInfo) Register(c *gin.Context) {
 func (u *UserInfo) UpdateUser(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
-		form UpdateUserForm
+		form dtos.UpdateUserForm
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
@@ -125,7 +108,7 @@ func (u *UserInfo) UpdateUser(c *gin.Context) {
 func (u *UserInfo) UpdateUserPassword(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
-		form UpdateUserPasswordForm
+		form dtos.UpdateUserPasswordForm
 	)
 
 	httpCode, errors := app.Valid(c, &form, false)
@@ -164,20 +147,6 @@ func (u *UserInfo) UpdateUserPassword(c *gin.Context) {
 
 }
 
-type GetCurrentUserInfoResponse struct {
-	ID       string       `json:"id"`
-	Account  string       `json:"account"`
-	Email    string       `json:"email"`
-	UserInfo UserInfoData `json:"user_info"`
-}
-
-type UserInfoData struct {
-	Name    string `json:"name"`
-	Country string `json:"country"`
-	Points  int64  `json:"points"`
-	Hp      int32  `json:"hp"`
-}
-
 func (u *UserInfo) GetCurrentUserInfo(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -203,11 +172,11 @@ func (u *UserInfo) GetCurrentUserInfo(c *gin.Context) {
 		return
 	}
 
-	user := GetCurrentUserInfoResponse{
+	user := dtos.GetCurrentUserInfoResponse{
 		ID:      response.GetUser().GetId(),
 		Account: response.GetUser().GetAccount(),
 		Email:   response.GetUser().GetEmail(),
-		UserInfo: UserInfoData{
+		UserInfo: dtos.UserInfoData{
 			Name:    response.GetUser().GetUserInfo().GetName(),
 			Country: response.GetUser().GetUserInfo().GetCountry(),
 			Points:  response.GetUser().GetUserInfo().GetPoints(),
@@ -217,11 +186,6 @@ func (u *UserInfo) GetCurrentUserInfo(c *gin.Context) {
 
 	appG.Response(http.StatusOK, true, "取得資料成功", nil, user)
 
-}
-
-type GetUserInfoResponse struct {
-	ID       string       `json:"id"`
-	UserInfo UserInfoData `json:"user_info"`
 }
 
 func (u *UserInfo) GetUserInfo(c *gin.Context) {
@@ -241,9 +205,9 @@ func (u *UserInfo) GetUserInfo(c *gin.Context) {
 		return
 	}
 
-	user := GetUserInfoResponse{
+	user := dtos.GetUserInfoResponse{
 		ID: response.GetUser().GetId(),
-		UserInfo: UserInfoData{
+		UserInfo: dtos.UserInfoData{
 			Name:    response.GetUser().GetUserInfo().GetName(),
 			Country: response.GetUser().GetUserInfo().GetCountry(),
 			Points:  response.GetUser().GetUserInfo().GetPoints(),
