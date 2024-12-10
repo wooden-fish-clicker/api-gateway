@@ -32,7 +32,9 @@ func main() {
 	app := fx.New(
 		// 依賴注入
 		fx.Provide(
-			redis.NewRedisClient,
+			func() *redis.Redis {
+				return redis.NewRedisClient(configs.C.Redis.Addr, configs.C.Redis.Password, configs.C.Redis.DB)
+			},
 
 			//middleware
 			middleware.NewCheckJwtToken,

@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"api-gateway/configs"
 	"api-gateway/pkg/logger"
 	"context"
 
@@ -12,16 +11,16 @@ type Redis struct {
 	Client *redis.Client
 }
 
-func NewRedisClient() *Redis {
-	rd := connectRedis()
+func NewRedisClient(addr string, password string, db int) *Redis {
+	rd := connectRedis(addr, password, db)
 	return &Redis{rd}
 }
 
-func connectRedis() *redis.Client {
+func connectRedis(addr string, password string, db int) *redis.Client {
 	rd := redis.NewClient(&redis.Options{
-		Addr:     configs.C.Redis.Addr,
-		Password: configs.C.Redis.Password,
-		DB:       configs.C.Redis.DB, // 使用默認的資料庫
+		Addr:     addr,
+		Password: password,
+		DB:       db, // 使用默認的資料庫
 	})
 
 	_, err := rd.Ping(context.Background()).Result()

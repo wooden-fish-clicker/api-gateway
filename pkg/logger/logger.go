@@ -141,7 +141,7 @@ func removeOldLogFiles(filePath string) {
 		Error("Remove Old Log Files,Failed to read log directory: ", err)
 	}
 
-	if len(files) <= configs.C.App.MaxLogFiles {
+	if len(files) < configs.C.App.MaxLogFiles {
 		return
 	}
 

@@ -14,12 +14,12 @@ import (
 )
 
 type Notify struct {
-	NotificationService notification.NotificationServiceClient
+	notificationService notification.NotificationServiceClient
 }
 
 func NewNotify(notificationService notification.NotificationServiceClient) *Notify {
 	return &Notify{
-		NotificationService: notificationService,
+		notificationService: notificationService,
 	}
 }
 
@@ -46,7 +46,7 @@ func (n *Notify) ReadNotification(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := n.NotificationService.ReadNotification(ctx, &notification.ReadNotificationRequest{
+	_, err := n.notificationService.ReadNotification(ctx, &notification.ReadNotificationRequest{
 		Ids: form.IDs,
 	})
 
@@ -65,7 +65,7 @@ func (n *Notify) DeleteNotification(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := n.NotificationService.DeleteNotification(ctx, &notification.DeleteNotificationRequest{
+	_, err := n.notificationService.DeleteNotification(ctx, &notification.DeleteNotificationRequest{
 		Id: c.Param("id"),
 	})
 
@@ -103,7 +103,7 @@ func (n *Notify) GetNotificationList(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := n.NotificationService.GetNotificationList(ctx, &notification.GetNotificationListRequest{
+	response, err := n.notificationService.GetNotificationList(ctx, &notification.GetNotificationListRequest{
 		UserId: claims.Subject,
 	})
 

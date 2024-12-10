@@ -14,12 +14,12 @@ import (
 )
 
 type UserInfo struct {
-	UserInfoService user_info.UserInfoServiceClient
+	userInfoService user_info.UserInfoServiceClient
 }
 
 func NewUserInfo(userInfoService user_info.UserInfoServiceClient) *UserInfo {
 	return &UserInfo{
-		UserInfoService: userInfoService,
+		userInfoService: userInfoService,
 	}
 }
 
@@ -60,12 +60,10 @@ func (u *UserInfo) Register(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := u.UserInfoService.UserRegister(ctx, &user_info.CreateUserRequest{
-		User: &user_info.User{
-			Account:  form.Account,
-			Email:    form.Email,
-			Password: form.Password,
-		},
+	response, err := u.userInfoService.UserRegister(ctx, &user_info.CreateUserRequest{
+		Account:  form.Account,
+		Email:    form.Email,
+		Password: form.Password,
 	})
 
 	if err != nil {
@@ -103,7 +101,7 @@ func (u *UserInfo) UpdateUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := u.UserInfoService.UpdateUser(ctx, &user_info.UpdateUserRequest{
+	_, err := u.userInfoService.UpdateUser(ctx, &user_info.UpdateUserRequest{
 		User: &user_info.User{
 			Id:      claims.Subject,
 			Account: form.Account,
@@ -151,7 +149,7 @@ func (u *UserInfo) UpdateUserPassword(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := u.UserInfoService.UpdateUserPassword(ctx, &user_info.UpdateUserPasswordRequest{
+	_, err := u.userInfoService.UpdateUserPassword(ctx, &user_info.UpdateUserPasswordRequest{
 		Id:          claims.Subject,
 		NewPassword: form.NewPassword,
 		OldPassword: form.OldPassword,
@@ -196,7 +194,7 @@ func (u *UserInfo) GetCurrentUserInfo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := u.UserInfoService.GetUserDeteil(ctx, &user_info.GetUserRequest{
+	response, err := u.userInfoService.GetUserDeteil(ctx, &user_info.GetUserRequest{
 		Id: claims.Subject,
 	})
 
@@ -234,7 +232,7 @@ func (u *UserInfo) GetUserInfo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := u.UserInfoService.GetUserDeteil(ctx, &user_info.GetUserRequest{
+	response, err := u.userInfoService.GetUserDeteil(ctx, &user_info.GetUserRequest{
 		Id: c.Param("id"),
 	})
 

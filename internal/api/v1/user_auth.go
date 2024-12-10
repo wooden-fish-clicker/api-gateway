@@ -15,12 +15,12 @@ import (
 )
 
 type UserAuth struct {
-	UserAuthService user_auth.UserAuthServiceClient
+	userAuthService user_auth.UserAuthServiceClient
 }
 
 func NewUserAuth(userAuthService user_auth.UserAuthServiceClient) *UserAuth {
 	return &UserAuth{
-		UserAuthService: userAuthService,
+		userAuthService: userAuthService,
 	}
 }
 
@@ -52,7 +52,7 @@ func (u *UserAuth) Login(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := u.UserAuthService.Login(ctx, &user_auth.LoginRequest{
+	response, err := u.userAuthService.Login(ctx, &user_auth.LoginRequest{
 		Account:  form.Account,
 		Password: form.Password,
 	})
@@ -85,7 +85,7 @@ func (u *UserAuth) LineLogin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := u.UserAuthService.LineLogin(ctx, &user_auth.LineloginRequest{
+	response, err := u.userAuthService.LineLogin(ctx, &user_auth.LineloginRequest{
 		Code: form.Code,
 	})
 
@@ -113,7 +113,7 @@ func (u *UserAuth) Logout(c *gin.Context) {
 	md := metadata.Pairs("authorization", jwtToken.(string))
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	empty := new(emptypb.Empty)
-	_, err := u.UserAuthService.Logout(ctx, empty)
+	_, err := u.userAuthService.Logout(ctx, empty)
 	if err != nil {
 		logger.Error(err.Error())
 		appG.Response(http.StatusOK, true, "登出成功", nil, nil)
