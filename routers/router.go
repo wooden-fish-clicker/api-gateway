@@ -1,7 +1,7 @@
 package routers
 
 import (
-	v1 "api-gateway/internal/api/v1"
+	v1 "api-gateway/internal/endpoints/api/v1"
 	"api-gateway/middleware"
 
 	"github.com/gin-gonic/gin"

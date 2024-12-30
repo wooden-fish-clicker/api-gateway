@@ -5,20 +5,14 @@ import (
 	"api-gateway/grpc/notification"
 	"api-gateway/grpc/user_auth"
 	"api-gateway/grpc/user_info"
-	v1 "api-gateway/internal/api/v1"
+	"api-gateway/internal/endpoints"
+	v1 "api-gateway/internal/endpoints/api/v1"
 	"api-gateway/middleware"
 	"api-gateway/pkg/logger"
 	"api-gateway/pkg/redis"
 	"api-gateway/routers"
-	"context"
-	"fmt"
-	"net/http"
-	"time"
 
-	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
@@ -43,13 +37,13 @@ func main() {
 
 			//grpc client
 			func() user_auth.UserAuthServiceClient {
-				return user_auth.NewUserAuthServiceClient(createClient(configs.C.Service.UserAuth))
+				return user_auth.NewUserAuthServiceClient(endpoints.CreateClient(configs.C.Service.UserAuth))
 			},
 			func() user_info.UserInfoServiceClient {
-				return user_info.NewUserInfoServiceClient(createClient(configs.C.Service.UserInfo))
+				return user_info.NewUserInfoServiceClient(endpoints.CreateClient(configs.C.Service.UserInfo))
 			},
 			func() notification.NotificationServiceClient {
-				return notification.NewNotificationServiceClient(createClient(configs.C.Service.Notification))
+				return notification.NewNotificationServiceClient(endpoints.CreateClient(configs.C.Service.Notification))
 			},
 
 			//api
@@ -62,46 +56,9 @@ func main() {
 		),
 
 		// 啟動
-		fx.Invoke(startServer),
+		fx.Invoke(endpoints.StartServer),
 	)
 
 	app.Run()
 
-}
-
-func createClient(serviceAddr string) *grpc.ClientConn {
-	conn, err := grpc.NewClient(serviceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logger.Fatal("無法連接到服務器 %s:%v", serviceAddr, err)
-	}
-	return conn
-}
-
-func startServer(lc fx.Lifecycle, router *gin.Engine) {
-	gin.SetMode(configs.C.Server.RunMode)
-	server := &http.Server{
-		Addr:           fmt.Sprintf(":%d", configs.C.Server.HttpPort),
-		Handler:        router,
-		ReadTimeout:    configs.C.Server.ReadTimeout * time.Second,
-		WriteTimeout:   configs.C.Server.WriteTimeout * time.Second,
-		MaxHeaderBytes: 1 << 20, // 1 MB
-	}
-
-	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			logger.Info("Starting server on :8080")
-
-			go func() {
-				if err := server.ListenAndServe(); err != nil {
-					logger.Fatal("Starting server error ：%v", err)
-				}
-			}()
-
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			logger.Info("Stopping server")
-			return server.Shutdown(ctx)
-		},
-	})
 }

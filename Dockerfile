@@ -4,8 +4,8 @@ FROM golang:1.22-alpine as builder
 WORKDIR /app
 
 # 將Go模組文件複製到容器中
-COPY go.mod .
-COPY go.sum .
+# 如果 go.mod 或 go.sum 文件沒有改變，執行 COPY go.mod go.sum ./ 和 RUN go mod download 這兩個命令時，Docker 會利用緩存跳過這些步驟
+COPY go.mod go.sum ./
 
 # 下載所有依賴
 RUN go mod download
@@ -23,7 +23,7 @@ WORKDIR /app
 
 COPY --from=builder /app/main .
 
-COPY configs ./configs
+COPY configs/*.toml  ./configs/
 
 COPY entrypoint.sh /usr/local/bin/
 

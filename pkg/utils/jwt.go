@@ -41,7 +41,7 @@ func ParseJwtToken(token string) (*Claims, error) {
 			}
 
 			// 檢查是否是從我們這裡發出的
-			if claims.Issuer != configs.C.App.AppName {
+			if claims.Issuer != configs.C.Jwt.Issuer {
 				return nil, errors.New("invalid token issuer")
 			}
 

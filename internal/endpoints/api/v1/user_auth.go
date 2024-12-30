@@ -2,8 +2,8 @@ package v1
 
 import (
 	"api-gateway/grpc/user_auth"
-	"api-gateway/internal/api"
 	"api-gateway/internal/dtos"
+	"api-gateway/internal/endpoints/api"
 	"api-gateway/pkg/app"
 	"api-gateway/pkg/logger"
 	"context"

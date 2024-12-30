@@ -51,6 +51,7 @@ type MongoDB struct {
 type Jwt struct {
 	Secret         string
 	ExpirationDays int
+	Issuer         string
 }
 
 type Redis struct {
@@ -100,28 +101,4 @@ func Setup() {
 
 	godotenv.Load()
 
-	applyEnvVariables()
-}
-
-func applyEnvVariables() {
-	C.App.PrefixUrl = viper.GetString("PREFIX_URL")
-
-	C.Server.RunMode = viper.GetString("RUN_MODE")
-
-	C.MySql.ConnString = viper.GetString("DB_CONNSTRING")
-	C.MySql.Name = viper.GetString("DB_NAME")
-
-	C.MongoDB.ConnString = viper.GetString("MONGO_DB_COONSTRING")
-	C.MongoDB.Name = viper.GetString("MONGO_DB_NAME")
-
-	C.Redis.Addr = viper.GetString("REDIS_ADDR")
-	C.Redis.Password = viper.GetString("REDIS_PASSWORD")
-	C.Redis.DB = viper.GetInt("REDIS_DB")
-
-	C.Jwt.Secret = viper.GetString("JWT_SECRET")
-	C.Jwt.ExpirationDays = viper.GetInt("JWT_EXPIRATION_DAYS")
-
-	C.Service.UserInfo = viper.GetString("USER_INFO_SERVICE_ADDR")
-	C.Service.UserAuth = viper.GetString("USER_AUTH_SERVICE_ADDR")
-	C.Service.Notification = viper.GetString("NOTIFICATION_SERVICE_ADDR")
 }

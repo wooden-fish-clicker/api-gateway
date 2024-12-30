@@ -36,6 +36,7 @@
 [Jwt]
     Secret = "gin_example"
     ExpirationDays = 30 # 天
+    Issuer = "Issuer"
 
 [Redis]
     Addr = "127.0.0.1:6379"
