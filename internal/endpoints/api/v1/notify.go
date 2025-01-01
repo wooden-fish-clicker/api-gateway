@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"api-gateway/grpc/notification"
+	"api-gateway/grpc_proto/notification"
 	"api-gateway/internal/dtos"
 	"api-gateway/internal/endpoints/api"
 	"api-gateway/pkg/app"

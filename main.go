@@ -2,15 +2,15 @@ package main
 
 import (
 	"api-gateway/configs"
-	"api-gateway/grpc/notification"
-	"api-gateway/grpc/user_auth"
-	"api-gateway/grpc/user_info"
-	"api-gateway/internal/endpoints"
+	"api-gateway/grpc_proto/notification"
+	"api-gateway/grpc_proto/user_auth"
+	"api-gateway/grpc_proto/user_info"
 	v1 "api-gateway/internal/endpoints/api/v1"
-	"api-gateway/middleware"
+	"api-gateway/internal/middleware"
+	"api-gateway/internal/routers"
+	"api-gateway/internal/server"
 	"api-gateway/pkg/logger"
 	"api-gateway/pkg/redis"
-	"api-gateway/routers"
 
 	"go.uber.org/fx"
 )
@@ -37,13 +37,13 @@ func main() {
 
 			//grpc client
 			func() user_auth.UserAuthServiceClient {
-				return user_auth.NewUserAuthServiceClient(endpoints.CreateClient(configs.C.Service.UserAuth))
+				return user_auth.NewUserAuthServiceClient(server.CreateClient(configs.C.Service.UserAuth))
 			},
 			func() user_info.UserInfoServiceClient {
-				return user_info.NewUserInfoServiceClient(endpoints.CreateClient(configs.C.Service.UserInfo))
+				return user_info.NewUserInfoServiceClient(server.CreateClient(configs.C.Service.UserInfo))
 			},
 			func() notification.NotificationServiceClient {
-				return notification.NewNotificationServiceClient(endpoints.CreateClient(configs.C.Service.Notification))
+				return notification.NewNotificationServiceClient(server.CreateClient(configs.C.Service.Notification))
 			},
 
 			//api
@@ -56,7 +56,7 @@ func main() {
 		),
 
 		// 啟動
-		fx.Invoke(endpoints.StartServer),
+		fx.Invoke(server.StartServer),
 	)
 
 	app.Run()

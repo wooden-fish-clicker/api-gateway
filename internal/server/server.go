@@ -1,4 +1,4 @@
-package endpoints
+package server
 
 import (
 	"api-gateway/configs"

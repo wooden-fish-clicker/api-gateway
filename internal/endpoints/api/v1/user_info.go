@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"api-gateway/grpc/user_info"
+	"api-gateway/grpc_proto/user_info"
 	"api-gateway/internal/dtos"
 	"api-gateway/internal/endpoints/api"
 	"api-gateway/pkg/app"

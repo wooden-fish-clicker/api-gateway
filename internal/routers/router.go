@@ -2,7 +2,7 @@ package routers
 
 import (
 	v1 "api-gateway/internal/endpoints/api/v1"
-	"api-gateway/middleware"
+	"api-gateway/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
